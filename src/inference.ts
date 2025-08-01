@@ -109,6 +109,9 @@ export async function mcpInference(
       requestBody.response_format = request.responseFormat
     }
 
+    core.info('RequestBody:')
+    core.info(`${JSON.stringify(requestBody, null, 2)}`)
+
     const response = await client.path('/chat/completions').post({
       body: requestBody,
     })

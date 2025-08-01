@@ -49087,7 +49087,20 @@ function handleUnexpectedResponse(response) {
     const errorCodeMsg = errorCode ? ` (error code: ${errorCode})` : '';
     // Check if response body exists and contains error details
     if (response.body && response.body.error) {
-        throw response.body.error;
+        const errorObj = response.body.error;
+        if (errorObj instanceof Error) {
+            throw errorObj;
+        }
+        else if (typeof errorObj === 'string') {
+            throw new Error(errorObj);
+        }
+        else if (typeof errorObj === 'object' && errorObj !== null) {
+            const message = errorObj.message || JSON.stringify(errorObj);
+            throw new Error(`AI service error: ${message}`);
+        }
+        else {
+            throw new Error(`AI service error: ${String(errorObj)}`);
+        }
     }
     // Handle case where response body is missing
     if (!response.body) {
@@ -49206,6 +49219,8 @@ async function mcpInference(request, githubMcpClient) {
         if (iterationCount === 1 && request.responseFormat) {
             requestBody.response_format = request.responseFormat;
         }
+        coreExports.info('RequestBody:');
+        coreExports.info(`${JSON.stringify(requestBody, null, 2)}`);
         const response = await client.path('/chat/completions').post({
             body: requestBody,
         });
