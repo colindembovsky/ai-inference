@@ -41871,15 +41871,19 @@ class StreamableHTTPClientTransport {
 /**
  * Connect to the GitHub MCP server and retrieve available tools
  */
-async function connectToGitHubMCP(token) {
+async function connectToGitHubMCP(token, org) {
     const githubMcpUrl = 'https://api.githubcopilot.com/mcp/';
     coreExports.info('Connecting to GitHub MCP server...');
+    const headers = {
+        Authorization: `Bearer ${token}`,
+        'X-MCP-Readonly': 'true',
+    };
+    if (org) {
+        headers['X-GitHub-Org'] = org;
+    }
     const transport = new StreamableHTTPClientTransport(new URL(githubMcpUrl), {
         requestInit: {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'X-MCP-Readonly': 'true',
-            },
+            headers,
         },
     });
     const client = new Client({
@@ -52136,7 +52140,8 @@ async function run() {
         const enableMcp = coreExports.getBooleanInput('enable-github-mcp') || false;
         let modelResponse = null;
         if (enableMcp) {
-            const mcpClient = await connectToGitHubMCP(inferenceRequest.token);
+            const mcpOrg = coreExports.getInput('github-mcp-org') || undefined;
+            const mcpClient = await connectToGitHubMCP(inferenceRequest.token, mcpOrg);
             if (mcpClient) {
                 modelResponse = await mcpInference(inferenceRequest, mcpClient);
             }

@@ -168,6 +168,22 @@ steps:
       token: ${{ secrets.USER_PAT }}
 ```
 
+#### Using MCP with a specific organization
+
+You can also specify a GitHub organization to scope MCP operations. You must do this when the PAT you are using is accessing repos in an Organization instead of your personal repos.
+
+```yaml
+steps:
+  - name: AI Inference with GitHub Tools for Organization
+    id: inference
+    uses: actions/ai-inference@v1.2
+    with:
+      prompt: 'List open issues in my organization repositories'
+      enable-github-mcp: true
+      github-mcp-org: 'my-organization'
+      token: ${{ secrets.USER_PAT }}
+```
+
 When MCP is enabled, the AI model will have access to GitHub tools and can
 perform actions like searching issues and PRs.
 
@@ -191,6 +207,7 @@ the action:
 | `endpoint`           | The endpoint to use for inference. If you're running this as part of an org, you should probably use the org-specific Models endpoint                         | `https://models.github.ai/inference` |
 | `max-tokens`         | The max number of tokens to generate                                                                                                                          | 200                                  |
 | `enable-github-mcp`  | Enable Model Context Protocol integration with GitHub tools                                                                                                   | `false`                              |
+| `github-mcp-org`     | The GitHub organization to use for MCP (optional). When specified, adds organization context to GitHub tool operations                                        | `""`                                 |
 
 ## Outputs
 

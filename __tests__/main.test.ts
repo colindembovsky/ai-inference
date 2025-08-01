@@ -176,7 +176,7 @@ describe('main.ts', () => {
 
     await run()
 
-    expect(mockConnectToGitHubMCP).toHaveBeenCalledWith('fake-token')
+    expect(mockConnectToGitHubMCP).toHaveBeenCalledWith('fake-token', undefined)
     expect(mockMcpInference).toHaveBeenCalledWith(
       expect.objectContaining({
         messages: [
@@ -202,7 +202,7 @@ describe('main.ts', () => {
 
     await run()
 
-    expect(mockConnectToGitHubMCP).toHaveBeenCalledWith('fake-token')
+    expect(mockConnectToGitHubMCP).toHaveBeenCalledWith('fake-token', undefined)
     expect(mockSimpleInference).toHaveBeenCalled()
     expect(mockMcpInference).not.toHaveBeenCalled()
     expect(core.warning).toHaveBeenCalledWith('MCP connection failed, falling back to simple inference')
@@ -254,5 +254,90 @@ describe('main.ts', () => {
     await run()
 
     expect(core.setFailed).toHaveBeenCalledWith(`File for prompt-file was not found: ${promptFile}`)
+  })
+
+  it('uses MCP inference with organization when github-mcp-org is provided', async () => {
+    const mockMcpClient = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      client: {} as any,
+      tools: [{type: 'function', function: {name: 'test-tool'}}],
+    }
+
+    mockInputs({
+      prompt: 'Hello, AI!',
+      'system-prompt': 'You are a test assistant.',
+      'enable-github-mcp': 'true',
+      'github-mcp-org': 'test-org',
+    })
+
+    mockConnectToGitHubMCP.mockResolvedValue(mockMcpClient)
+
+    await run()
+
+    expect(mockConnectToGitHubMCP).toHaveBeenCalledWith('fake-token', 'test-org')
+    expect(mockMcpInference).toHaveBeenCalledWith(
+      expect.objectContaining({
+        messages: [
+          {role: 'system', content: 'You are a test assistant.'},
+          {role: 'user', content: 'Hello, AI!'},
+        ],
+        token: 'fake-token',
+      }),
+      mockMcpClient,
+    )
+    expect(mockSimpleInference).not.toHaveBeenCalled()
+    verifyStandardResponse()
+  })
+
+  it('falls back to simple inference when MCP connection fails with org', async () => {
+    mockInputs({
+      prompt: 'Hello, AI!',
+      'system-prompt': 'You are a test assistant.',
+      'enable-github-mcp': 'true',
+      'github-mcp-org': 'test-org',
+    })
+
+    mockConnectToGitHubMCP.mockResolvedValue(null)
+
+    await run()
+
+    expect(mockConnectToGitHubMCP).toHaveBeenCalledWith('fake-token', 'test-org')
+    expect(mockSimpleInference).toHaveBeenCalled()
+    expect(mockMcpInference).not.toHaveBeenCalled()
+    expect(core.warning).toHaveBeenCalledWith('MCP connection failed, falling back to simple inference')
+    verifyStandardResponse()
+  })
+
+  it('uses MCP inference with undefined org when github-mcp-org is empty string', async () => {
+    const mockMcpClient = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      client: {} as any,
+      tools: [{type: 'function', function: {name: 'test-tool'}}],
+    }
+
+    mockInputs({
+      prompt: 'Hello, AI!',
+      'system-prompt': 'You are a test assistant.',
+      'enable-github-mcp': 'true',
+      'github-mcp-org': '',
+    })
+
+    mockConnectToGitHubMCP.mockResolvedValue(mockMcpClient)
+
+    await run()
+
+    expect(mockConnectToGitHubMCP).toHaveBeenCalledWith('fake-token', undefined)
+    expect(mockMcpInference).toHaveBeenCalledWith(
+      expect.objectContaining({
+        messages: [
+          {role: 'system', content: 'You are a test assistant.'},
+          {role: 'user', content: 'Hello, AI!'},
+        ],
+        token: 'fake-token',
+      }),
+      mockMcpClient,
+    )
+    expect(mockSimpleInference).not.toHaveBeenCalled()
+    verifyStandardResponse()
   })
 })

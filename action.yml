@@ -50,6 +50,10 @@ inputs:
     description: Enable Model Context Protocol integration with GitHub tools
     required: false
     default: 'false'
+  github-mcp-org:
+    description: The GitHub organization to use for MCP (optional)
+    required: false
+    default: ''
 
 # Define your outputs here.
 outputs:

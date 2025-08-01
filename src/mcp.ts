@@ -35,17 +35,23 @@ export interface GitHubMCPClient {
 /**
  * Connect to the GitHub MCP server and retrieve available tools
  */
-export async function connectToGitHubMCP(token: string): Promise<GitHubMCPClient | null> {
+export async function connectToGitHubMCP(token: string, org?: string): Promise<GitHubMCPClient | null> {
   const githubMcpUrl = 'https://api.githubcopilot.com/mcp/'
 
   core.info('Connecting to GitHub MCP server...')
 
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${token}`,
+    'X-MCP-Readonly': 'true',
+  }
+
+  if (org) {
+    headers['X-GitHub-Org'] = org
+  }
+
   const transport = new StreamableHTTPClientTransport(new URL(githubMcpUrl), {
     requestInit: {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'X-MCP-Readonly': 'true',
-      },
+      headers,
     },
   })
 

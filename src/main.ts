@@ -67,7 +67,8 @@ export async function run(): Promise<void> {
     let modelResponse: string | null = null
 
     if (enableMcp) {
-      const mcpClient = await connectToGitHubMCP(inferenceRequest.token)
+      const mcpOrg = core.getInput('github-mcp-org') || undefined
+      const mcpClient = await connectToGitHubMCP(inferenceRequest.token, mcpOrg)
 
       if (mcpClient) {
         modelResponse = await mcpInference(inferenceRequest, mcpClient)

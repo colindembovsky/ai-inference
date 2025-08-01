@@ -113,6 +113,53 @@ describe('mcp.ts', () => {
       expect(result?.tools).toHaveLength(0)
       expect(core.info).toHaveBeenCalledWith('Retrieved 0 tools from GitHub MCP server')
     })
+
+    it('successfully connects with organization parameter', async () => {
+      const token = 'test-token'
+      const org = 'test-org'
+      const mockTools = [
+        {
+          name: 'test-tool',
+          description: 'Test tool',
+          inputSchema: {type: 'object', properties: {}},
+        },
+      ]
+
+      mockConnect.mockResolvedValue(undefined)
+      mockListTools.mockResolvedValue({tools: mockTools})
+
+      const result = await connectToGitHubMCP(token, org)
+
+      expect(result).not.toBeNull()
+      expect(result?.client).toBe(mockClient)
+      expect(result?.tools).toHaveLength(1)
+      expect(core.info).toHaveBeenCalledWith('Connecting to GitHub MCP server...')
+      expect(core.info).toHaveBeenCalledWith('Successfully connected to GitHub MCP server')
+      expect(core.info).toHaveBeenCalledWith('Retrieved 1 tools from GitHub MCP server')
+    })
+
+    it('successfully connects without organization parameter', async () => {
+      const token = 'test-token'
+      const mockTools = [
+        {
+          name: 'test-tool',
+          description: 'Test tool',
+          inputSchema: {type: 'object', properties: {}},
+        },
+      ]
+
+      mockConnect.mockResolvedValue(undefined)
+      mockListTools.mockResolvedValue({tools: mockTools})
+
+      const result = await connectToGitHubMCP(token)
+
+      expect(result).not.toBeNull()
+      expect(result?.client).toBe(mockClient)
+      expect(result?.tools).toHaveLength(1)
+      expect(core.info).toHaveBeenCalledWith('Connecting to GitHub MCP server...')
+      expect(core.info).toHaveBeenCalledWith('Successfully connected to GitHub MCP server')
+      expect(core.info).toHaveBeenCalledWith('Retrieved 1 tools from GitHub MCP server')
+    })
   })
 
   describe('executeToolCall', () => {
