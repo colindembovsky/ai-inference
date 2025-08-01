@@ -41879,7 +41879,11 @@ async function connectToGitHubMCP(token, org) {
         'X-MCP-Readonly': 'true',
     };
     if (org) {
+        coreExports.info(`Using GitHub MCP organization: ${org}`);
         headers['X-GitHub-Org'] = org;
+    }
+    else {
+        coreExports.info('No GitHub MCP organization specified, using default context');
     }
     const transport = new StreamableHTTPClientTransport(new URL(githubMcpUrl), {
         requestInit: {

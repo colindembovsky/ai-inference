@@ -46,7 +46,10 @@ export async function connectToGitHubMCP(token: string, org?: string): Promise<G
   }
 
   if (org) {
+    core.info(`Using GitHub MCP organization: ${org}`)
     headers['X-GitHub-Org'] = org
+  } else {
+    core.info('No GitHub MCP organization specified, using default context')
   }
 
   const transport = new StreamableHTTPClientTransport(new URL(githubMcpUrl), {
