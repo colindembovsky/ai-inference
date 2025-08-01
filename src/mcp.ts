@@ -87,8 +87,9 @@ export async function connectToGitHubMCP(token: string, org?: string): Promise<G
   }))
 
   // dump the tool names for debugging: 1 per line
+  core.info('Mapped GitHub MCP tools:')
   tools.forEach(tool => {
-    core.info(`Mapped GitHub MCP tool: ${tool.function.name}`)
+    core.info(` - ${tool.function.name}`)
   })
 
   core.info(`Mapped ${tools.length} GitHub MCP tools for Azure AI Inference`)

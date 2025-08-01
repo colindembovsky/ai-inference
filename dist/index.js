@@ -41914,6 +41914,11 @@ async function connectToGitHubMCP(token, org) {
             parameters: t.inputSchema,
         },
     }));
+    // dump the tool names for debugging: 1 per line
+    coreExports.info('Mapped GitHub MCP tools:');
+    tools.forEach(tool => {
+        coreExports.info(` - ${tool.function.name}`);
+    });
     coreExports.info(`Mapped ${tools.length} GitHub MCP tools for Azure AI Inference`);
     return { client, tools };
 }
